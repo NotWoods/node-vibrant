@@ -9,8 +9,6 @@ import {
 
 import { Palette, Swatch } from './color'
 
-import defaults = require('lodash/defaults')
-
 import Builder from './builder'
 
 import * as Util from './util'
@@ -37,46 +35,55 @@ class Vibrant {
     }
 
     static from(src: ImageSource): Builder {
-        return new Builder(src)
+        return new Builder(src);
     }
 
-    opts: ComputedOptions
-    private _palette: Palette
+    opts: ComputedOptions;
+    private _palette: Palette;
     constructor(private _src: ImageSource, opts?: Partial<Options>) {
-        this.opts = <ComputedOptions>defaults({}, opts, Vibrant.DefaultOpts)
-        this.opts.combinedFilter = Filters.combineFilters(this.opts.filters)
+        this.opts = Object.assign(
+            {},
+            Vibrant.DefaultOpts,
+            opts
+        ) as ComputedOptions;
+        this.opts.combinedFilter = Filter.combineFilters(this.opts.filters);
     }
     private _process(image: Image, opts: ComputedOptions): Promise<Palette> {
-        let { quantizer, generator} = opts
+        let { quantizer, generator } = opts;
 
-        image.scaleDown(opts)
+        image.scaleDown(opts);
 
-        return image.applyFilter(opts.combinedFilter)
-            .then((imageData) => quantizer(imageData.data, opts))
-            .then((colors) => Swatch.applyFilter(colors, opts.combinedFilter))
-            .then((colors) => Promise.resolve(generator(colors)))
+        return image
+            .applyFilter(opts.combinedFilter)
+            .then(imageData => quantizer(imageData.data, opts))
+            .then(colors => Swatch.applyFilter(colors, opts.combinedFilter))
+            .then(colors => Promise.resolve(generator(colors)));
     }
 
     palette(): Palette {
-        return this.swatches()
+        return this.swatches();
     }
     swatches(): Palette {
-        return this._palette
+        return this._palette;
     }
 
     getPalette(cb?: Callback<Palette>): Promise<Palette> {
-        let image = new this.opts.ImageClass()
-        const result = image.load(this._src)
-            .then((image) => this._process(image, this.opts))
-            .then((palette) => {
-                this._palette = palette
-                image.remove()
-                return palette
-            }, (err) => {
-                image.remove()
-                throw err
-            })
-        if (cb) result.then((palette) => cb(null, palette), (err) => cb(err))
+        let image = new this.opts.ImageClass();
+        const result = image
+            .load(this._src)
+            .then(image => this._process(image, this.opts))
+            .then(
+                palette => {
+                    this._palette = palette;
+                    image.remove();
+                    return palette;
+                },
+                err => {
+                    image.remove();
+                    throw err;
+                }
+            );
+        if (cb) result.then(palette => cb(null, palette), err => cb(err));
         return result;
     }
 }

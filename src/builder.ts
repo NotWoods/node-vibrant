@@ -1,5 +1,3 @@
-import clone = require('lodash/clone')
-
 import {
     Callback,
     ImageClass,
@@ -19,7 +17,7 @@ export default class Builder {
     constructor(src: ImageSource, opts: Partial<Options> = {}) {
         this._src = src
         this._opts = opts
-        this._opts.filters = clone(Vibrant.DefaultOpts.filters)
+        this._opts.filters = Vibrant.DefaultOpts.filters.slice(0);
     }
 
     maxColorCount(n: number): Builder {

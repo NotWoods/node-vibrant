@@ -1,17 +1,16 @@
-import { Options, ImageData, ImageSource, ImageCallback } from '../typing'
+import { ImageData, ImageSource } from '../typing'
 import { ImageBase } from './base'
-import * as Url from 'url'
 
 function isRelativeUrl(url: string): boolean {
-    let u = Url.parse(url)
-    return u.protocol === null
-        && u.host === null
-        && u.port === null
+    let u = new URL(url, location.href);
+    return u.protocol === location.protocol
+        && u.host === location.host
+        && u.port === location.port;
 }
 
 function isSameOrigin(a: string, b: string): boolean {
-    let ua = Url.parse(a)
-    let ub = Url.parse(b)
+    let ua = new URL(a)
+    let ub = new URL(b);
 
     // https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy
     return ua.protocol === ub.protocol
@@ -19,7 +18,7 @@ function isSameOrigin(a: string, b: string): boolean {
         && ua.port === ub.port
 }
 
-export default class BroswerImage extends ImageBase {
+export default class BrowserImage extends ImageBase {
     image: HTMLImageElement
     private _canvas: HTMLCanvasElement
     private _context: CanvasRenderingContext2D

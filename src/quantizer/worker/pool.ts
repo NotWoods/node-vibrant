@@ -1,9 +1,5 @@
 import { Swatch } from '../../color'
-import omit = require('lodash/omit')
-import find = require('lodash/find')
 import {
-    Quantizer,
-    Filter,
     Pixels,
     ComputedOptions
 } from '../../typing'
@@ -18,7 +14,7 @@ import {
     WorkerErrorResponse
 } from './common'
 
-interface Task extends WorkerRequest{
+interface Task extends WorkerRequest {
     deferred: DeferredPromise<Swatch[]>
 }
 
@@ -30,8 +26,6 @@ interface TaskWorker extends Worker {
 interface TaskWorkerClass {
     new (): TaskWorker
 }
-
-const WorkerClass: TaskWorkerClass = require('worker-loader?inline=true!./worker')
 
 const MAX_WORKER_COUNT = 5
 export default class WorkerPool {
@@ -50,13 +44,13 @@ export default class WorkerPool {
         let worker: TaskWorker
         // if no idle worker && worker count < max count, make new one
         if (this._workers.length === 0 || this._workers.length < MAX_WORKER_COUNT) {
-            worker = new WorkerClass()
+            worker = new Worker('./worker.js') as TaskWorker;
             worker.id = this._workers.length
             worker.idle = true
             this._workers.push(worker)
             worker.onmessage = this._onMessage.bind(this, worker.id)
         } else {
-            worker = find(this._workers, 'idle')
+            worker = this._workers.find(worker => worker.idle)
         }
 
         return worker
@@ -97,15 +91,9 @@ export default class WorkerPool {
         this._executing[task.id] = task
 
         // Send payload
-        let request = <WorkerRequest>omit(task, 'deferred')
-        request.payload.opts = <ComputedOptions>omit(
-            request.payload.opts,
-            'ImageClass',
-            'combinedFilter',
-            'filters',
-            'generator',
-            'quantizer'
-        )
+        let { deferred, ...request } = task;
+        const { ImageClass, combinedFilter, filters, generator, quantizer, ...payloadOpts } = request.payload.opts;
+        request.payload.opts = payloadOpts as ComputedOptions;
         worker.postMessage(request)
         worker.idle = false
     }
