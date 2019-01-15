@@ -3,8 +3,7 @@ import {
     ImageSource,
     Options,
     ComputedOptions,
-    Callback,
-    Filter
+    Callback
 } from './typing'
 
 import { Palette, Swatch } from './color'
@@ -15,24 +14,20 @@ import * as Util from './util'
 
 import * as Quantizer from './quantizer'
 import * as Generator from './generator'
-import * as Filters from './filter'
+import * as Filter from './filter'
+
+export { Builder, Quantizer, Generator, Filter, Util };
 
 
 class Vibrant {
-    static Builder = Builder
-    static Quantizer = Quantizer
-    static Generator = Generator
-    static Filter = Filters
-    static Util = Util
-
     static DefaultOpts: Partial<Options> = {
         colorCount: 64,
         quality: 5,
         generator: Generator.Default,
         ImageClass: null,
-        quantizer: Quantizer.MMCQ,
-        filters: [Filters.Default]
-    }
+        quantizer: Quantizer.WebWorker,
+        filters: [Filter.Default]
+    };
 
     static from(src: ImageSource): Builder {
         return new Builder(src);

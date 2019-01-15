@@ -3,4 +3,5 @@ import BrowserImage from './image/browser'
 
 Vibrant.DefaultOpts.ImageClass = BrowserImage;
 
-export = Vibrant
+export * from './vibrant';
+export default Vibrant
