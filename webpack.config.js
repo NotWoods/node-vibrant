@@ -15,28 +15,29 @@ module.exports = {
     resolve: {
         extensions: ['.ts', '.js']
     },
-  mode: "production",
-  optimization: {
-      minimize: true,
-      minimizer: [
-        new UglifyJsPlugin({
-          include: /\.min\.js$/
-        })
-      ]
+    mode: "production",
+    optimization: {
+        minimize: true,
+        minimizer: [
+            new UglifyJsPlugin({
+                include: /\.min\.js$/
+            })
+        ]
     },
     module: {
         rules: [
-          {
-            test: /\.tsx?$/,
-            loader: 'ts-loader',
-            options: {
-              configFile: 'tsconfig.browser.json'
+            {
+                test: /\.tsx?$/,
+                loader: 'ts-loader',
+                options: {
+                    configFile: 'tsconfig.browser.json'
+                }
             }
-          }
         ]
     },
     output: {
         filename: '[name].js',
-        path: path.resolve(__dirname, 'dist')
+        path: path.resolve(__dirname, 'dist'),
+        libraryTarget: 'commonjs-module'
     }
 }
